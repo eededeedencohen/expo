@@ -1,0 +1,16 @@
+# dependencies
+node_modules/
+
+# environment / secrets — NEVER commit real credentials
+.env
+.env.local
+.env.*.local
+
+# build output copied from the client (npm run deploy)
+dist/
+
+# logs & misc
+*.log
+npm-debug.log*
+coverage/
+.DS_Store
