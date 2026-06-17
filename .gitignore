@@ -6,8 +6,8 @@ node_modules/
 .env.local
 .env.*.local
 
-# build output copied from the client (npm run deploy)
-dist/
+# הערה: server/dist (ה-build של הלקוח) *כן* נכלל בריפו במכוון —
+# כדי שאותו שירות יגיש גם את ה-frontend. מריצים "npm run deploy" בלקוח כדי לעדכן אותו.
 
 # logs & misc
 *.log
