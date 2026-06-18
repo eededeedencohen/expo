@@ -177,6 +177,14 @@ export async function postSpin(req, res, next) {
       winnerId: typeof b.winnerId === "string" ? b.winnerId : null,
       winnerName: typeof b.winnerName === "string" ? b.winnerName : "",
       winnerSerial: b.winnerSerial == null ? null : Number(b.winnerSerial),
+      // צילום-מצב המשתתפים שעליו חושב הזוכה — כדי שכל הלקוחות יציירו גלגל זהה
+      participants: Array.isArray(b.participants)
+        ? b.participants.slice(0, 1000).map((p) => ({
+            id: String(p?.id || ""),
+            name: String(p?.name || ""),
+            serial: p?.serial == null ? null : Number(p.serial),
+          }))
+        : [],
     };
     const updated = await RaffleState.findByIdAndUpdate(
       "current",
