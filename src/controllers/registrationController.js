@@ -81,6 +81,37 @@ export async function getRegistrations(req, res, next) {
 }
 
 /**
+ * POST /api/registrations/lookup - חיפוש ציבורי של נרשם קיים לפי טלפון או מייל.
+ * מחזיר מינימום מידע: שם פרטי + מספר ההרשמה (מספר ההגרלה) בלבד.
+ */
+export async function lookupRegistration(req, res, next) {
+  try {
+    const query = typeof req.body?.query === "string" ? req.body.query.trim() : "";
+    if (!query) {
+      return res.status(400).json({ error: "bad_request", message: "יש להזין טלפון או מייל" });
+    }
+
+    let doc = null;
+    if (query.includes("@")) {
+      doc = await Registration.findOne({ email: query.toLowerCase() })
+        .select("serial firstName")
+        .lean();
+    } else {
+      const digits = query.replace(/\D/g, "");
+      if (digits.length >= 6) {
+        const candidates = await Registration.find({}).select("serial firstName phone").lean();
+        doc = candidates.find((r) => (r.phone || "").replace(/\D/g, "") === digits) || null;
+      }
+    }
+
+    if (!doc) return res.json({ found: false });
+    return res.json({ found: true, serial: doc.serial ?? null, firstName: doc.firstName || "" });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
  * DELETE /api/registrations/:id - מחיקת רשומה בודדת.
  */
 export async function deleteRegistration(req, res, next) {

@@ -7,6 +7,7 @@ import {
   deleteRegistration,
   bulkDeleteRegistrations,
   deleteAllRegistrations,
+  lookupRegistration,
 } from "../controllers/registrationController.js";
 import { requireAdmin } from "../middleware/requireAdmin.js";
 import { config } from "../config/env.js";
@@ -26,7 +27,17 @@ const createLimiter = rateLimit({
   },
 });
 
+// חיפוש ציבורי של נרשם קיים — מוגבל בקצב נגד אנומרציה
+const lookupLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "rate_limited", message: "יותר מדי בקשות, נסו שוב בעוד מספר דקות" },
+});
+
 // נתיבים ספציפיים לפני נתיבי פרמטר
+router.post("/lookup", lookupLimiter, lookupRegistration);
 router.get("/export", requireAdmin, exportRegistrations);
 router.post("/delete-all", requireAdmin, deleteAllRegistrations);
 router.post("/bulk-delete", requireAdmin, bulkDeleteRegistrations);
