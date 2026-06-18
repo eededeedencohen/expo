@@ -6,6 +6,7 @@ import {
   exportRegistrations,
   deleteRegistration,
   bulkDeleteRegistrations,
+  deleteAllRegistrations,
 } from '../controllers/registrationController.js';
 import { requireAdmin } from '../middleware/requireAdmin.js';
 import { config } from '../config/env.js';
@@ -24,6 +25,7 @@ const createLimiter = rateLimit({
 
 // נתיבים ספציפיים לפני נתיבי פרמטר
 router.get('/export', requireAdmin, exportRegistrations);
+router.post('/delete-all', requireAdmin, deleteAllRegistrations);
 router.post('/bulk-delete', requireAdmin, bulkDeleteRegistrations);
 
 router.get('/', requireAdmin, getRegistrations);

@@ -19,3 +19,10 @@ export async function nextSequence(name) {
   );
   return doc.seq;
 }
+
+/**
+ * מאפס את המונה ל-0 (הרצף הבא יתחיל מ-1).
+ */
+export async function resetSequence(name) {
+  await Counter.findByIdAndUpdate(name, { $set: { seq: 0 } }, { upsert: true });
+}

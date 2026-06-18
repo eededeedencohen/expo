@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { Registration } from '../models/Registration.js';
-import { nextSequence } from '../models/Counter.js';
+import { nextSequence, resetSequence } from '../models/Counter.js';
 import { validateRegistration } from '../utils/validateRegistration.js';
 import { serializeRegistration } from '../utils/serialize.js';
 import { buildRegistrationsWorkbook } from '../services/excelService.js';
@@ -84,6 +84,19 @@ export async function deleteRegistration(req, res, next) {
       return res.status(404).json({ error: 'not_found', message: 'הרשומה לא נמצאה' });
     }
     return res.json({ deleted: [id], count: 1 });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * POST /api/registrations/delete-all — מחיקת כל הרשומות ואיפוס מונה הרצף.
+ */
+export async function deleteAllRegistrations(req, res, next) {
+  try {
+    const result = await Registration.deleteMany({});
+    await resetSequence('registration');
+    return res.json({ deleted: result.deletedCount, reset: true });
   } catch (err) {
     next(err);
   }
