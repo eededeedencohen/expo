@@ -1,12 +1,12 @@
 # dependencies
 node_modules/
 
-# environment / secrets — NEVER commit real credentials
+# environment / secrets - NEVER commit real credentials
 .env
 .env.local
 .env.*.local
 
-# הערה: server/dist (ה-build של הלקוח) *כן* נכלל בריפו במכוון —
+# הערה: server/dist (ה-build של הלקוח) *כן* נכלל בריפו במכוון -
 # כדי שאותו שירות יגיש גם את ה-frontend. מריצים "npm run deploy" בלקוח כדי לעדכן אותו.
 
 # logs & misc
