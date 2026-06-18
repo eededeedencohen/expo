@@ -8,6 +8,9 @@ import {
   bulkDeleteRegistrations,
   deleteAllRegistrations,
   lookupRegistration,
+  setRaffle,
+  getRaffle,
+  removeFromRaffle,
 } from "../controllers/registrationController.js";
 import { requireAdmin } from "../middleware/requireAdmin.js";
 import { config } from "../config/env.js";
@@ -38,6 +41,9 @@ const lookupLimiter = rateLimit({
 
 // נתיבים ספציפיים לפני נתיבי פרמטר
 router.post("/lookup", lookupLimiter, lookupRegistration);
+router.get("/raffle", getRaffle); // ציבורי — תצוגה חיה
+router.post("/raffle", requireAdmin, setRaffle);
+router.post("/raffle/remove", requireAdmin, removeFromRaffle);
 router.get("/export", requireAdmin, exportRegistrations);
 router.post("/delete-all", requireAdmin, deleteAllRegistrations);
 router.post("/bulk-delete", requireAdmin, bulkDeleteRegistrations);

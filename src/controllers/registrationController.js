@@ -81,6 +81,60 @@ export async function getRegistrations(req, res, next) {
 }
 
 /**
+ * POST /api/registrations/raffle - קביעת משתתפי ההגרלה (מנהל). מחליף את הקבוצה הקיימת.
+ */
+export async function setRaffle(req, res, next) {
+  try {
+    const rawIds = Array.isArray(req.body?.ids) ? req.body.ids : [];
+    const ids = [...new Set(rawIds.filter((id) => mongoose.isValidObjectId(id)))];
+    await Registration.updateMany({ inRaffle: true }, { $set: { inRaffle: false } });
+    if (ids.length) {
+      await Registration.updateMany({ _id: { $in: ids } }, { $set: { inRaffle: true } });
+    }
+    return res.json({ count: ids.length });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * GET /api/registrations/raffle - משתתפי ההגרלה הנוכחיים (ציבורי, לתצוגה חיה).
+ * מחזיר מינימום: מזהה, מספר הרשמה ושם.
+ */
+export async function getRaffle(req, res, next) {
+  try {
+    const docs = await Registration.find({ inRaffle: true })
+      .select("serial firstName lastName")
+      .sort({ serial: 1, _id: 1 })
+      .lean();
+    const participants = docs.map((d) => ({
+      id: d._id.toString(),
+      serial: d.serial ?? null,
+      name: `${d.firstName || ""} ${d.lastName || ""}`.trim(),
+    }));
+    return res.json({ participants, count: participants.length });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * POST /api/registrations/raffle/remove - הסרת משתתף בודד מההגרלה (מנהל).
+ */
+export async function removeFromRaffle(req, res, next) {
+  try {
+    const id = req.body?.id;
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(400).json({ error: "bad_id", message: "מזהה לא תקין" });
+    }
+    await Registration.updateOne({ _id: id }, { $set: { inRaffle: false } });
+    return res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
  * POST /api/registrations/lookup - חיפוש ציבורי של נרשם קיים לפי טלפון או מייל.
  * מחזיר מינימום מידע: שם פרטי + מספר ההרשמה (מספר ההגרלה) בלבד.
  */

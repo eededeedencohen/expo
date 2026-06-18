@@ -48,6 +48,8 @@ const registrationSchema = new mongoose.Schema(
     product: { type: String, trim: true, default: "", maxlength: 200 },
     // מספר הרשמה רץ וייחודי (אינדקס הרשמה / מספר להגרלה)
     serial: { type: Number, index: true },
+    // האם הנרשם משתתף כרגע בהגרלה (לתצוגה חיה ומשותפת בין מכשירים)
+    inRaffle: { type: Boolean, default: false, index: true },
   },
   {
     timestamps: { createdAt: "createdAt", updatedAt: false },
