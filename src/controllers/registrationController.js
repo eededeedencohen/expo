@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { Registration } from '../models/Registration.js';
 import { validateRegistration } from '../utils/validateRegistration.js';
 import { serializeRegistration } from '../utils/serialize.js';
@@ -62,6 +63,42 @@ export async function getRegistrations(req, res, next) {
       cursor,
       serverTime: new Date().toISOString(),
     });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * DELETE /api/registrations/:id — מחיקת רשומה בודדת.
+ */
+export async function deleteRegistration(req, res, next) {
+  try {
+    const { id } = req.params;
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(400).json({ error: 'bad_id', message: 'מזהה לא תקין' });
+    }
+    const deleted = await Registration.findByIdAndDelete(id).lean();
+    if (!deleted) {
+      return res.status(404).json({ error: 'not_found', message: 'הרשומה לא נמצאה' });
+    }
+    return res.json({ deleted: [id], count: 1 });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * POST /api/registrations/bulk-delete — מחיקת כמה רשומות לפי מערך ids.
+ */
+export async function bulkDeleteRegistrations(req, res, next) {
+  try {
+    const rawIds = Array.isArray(req.body?.ids) ? req.body.ids : [];
+    const ids = [...new Set(rawIds.filter((id) => mongoose.isValidObjectId(id)))];
+    if (!ids.length) {
+      return res.status(400).json({ error: 'bad_request', message: 'לא נבחרו רשומות תקינות למחיקה' });
+    }
+    const result = await Registration.deleteMany({ _id: { $in: ids } });
+    return res.json({ deleted: ids, count: result.deletedCount });
   } catch (err) {
     next(err);
   }

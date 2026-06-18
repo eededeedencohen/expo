@@ -4,6 +4,8 @@ import {
   createRegistration,
   getRegistrations,
   exportRegistrations,
+  deleteRegistration,
+  bulkDeleteRegistrations,
 } from '../controllers/registrationController.js';
 import { requireAdmin } from '../middleware/requireAdmin.js';
 import { config } from '../config/env.js';
@@ -20,9 +22,12 @@ const createLimiter = rateLimit({
   message: { error: 'rate_limited', message: 'יותר מדי בקשות, נסו שוב בעוד מספר דקות' },
 });
 
-// /export חייב להיות לפני שאר ה-GET כדי שלא יתפרש כפרמטר
+// נתיבים ספציפיים לפני נתיבי פרמטר
 router.get('/export', requireAdmin, exportRegistrations);
+router.post('/bulk-delete', requireAdmin, bulkDeleteRegistrations);
+
 router.get('/', requireAdmin, getRegistrations);
 router.post('/', createLimiter, createRegistration);
+router.delete('/:id', requireAdmin, deleteRegistration);
 
 export default router;

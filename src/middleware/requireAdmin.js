@@ -16,8 +16,12 @@ function safeEqual(a, b) {
 let warned = false;
 export function requireAdmin(req, res, next) {
   if (!config.adminToken) {
+    // fail-closed בפרודקשן: בלי ADMIN_TOKEN נתיבי הניהול נעולים (לא חושפים PII).
+    if (config.isProduction) {
+      return res.status(401).json({ error: 'unauthorized', message: 'ניהול לא זמין — לא הוגדר ADMIN_TOKEN' });
+    }
     if (!warned) {
-      console.warn('⚠  ADMIN_TOKEN לא הוגדר — נתיבי הניהול פתוחים ללא הזדהות. הגדירו ADMIN_TOKEN ב-.env.');
+      console.warn('⚠  ADMIN_TOKEN לא הוגדר — נתיבי הניהול פתוחים ללא הזדהות (פיתוח בלבד).');
       warned = true;
     }
     return next();
