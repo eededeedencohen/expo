@@ -26,8 +26,21 @@ export async function createRegistration(req, res, next) {
           fields: errors,
         });
     }
+    // ייחודיות: אותו טלפון או אותו מייל לא יכולים להירשם פעמיים
+    const emailLower = data.email.toLowerCase();
+    const phoneDigits = data.phone.replace(/\D/g, "");
+    const existing = await Registration.findOne({
+      $or: [{ email: emailLower }, { phoneDigits }],
+    }).lean();
+    if (existing) {
+      const emailDup = existing.email === emailLower;
+      const message = emailDup ? "כתובת המייל כבר רשומה" : "מספר הטלפון כבר רשום";
+      const field = emailDup ? "email" : "phoneRest";
+      return res.status(409).json({ error: "duplicate", message, fields: { [field]: message } });
+    }
+
     const serial = await nextSequence("registration");
-    const doc = await Registration.create({ ...data, serial });
+    const doc = await Registration.create({ ...data, serial, phoneDigits });
     return res.status(201).json({ registration: serializeRegistration(doc) });
   } catch (err) {
     next(err);

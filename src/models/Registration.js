@@ -50,6 +50,8 @@ const registrationSchema = new mongoose.Schema(
     serial: { type: Number, index: true },
     // האם הנרשם משתתף כרגע בהגרלה (לתצוגה חיה ומשותפת בין מכשירים)
     inRaffle: { type: Boolean, default: false, index: true },
+    // ספרות הטלפון בלבד — לבדיקת ייחודיות (ללא תלות בפורמט)
+    phoneDigits: { type: String, index: true },
   },
   {
     timestamps: { createdAt: "createdAt", updatedAt: false },
