@@ -1,7 +1,7 @@
 import ExcelJS from 'exceljs';
 
 const COLUMNS = [
-  { header: '#', key: 'index', width: 6 },
+  { header: 'מספר הרשמה', key: 'serial', width: 12 },
   { header: 'שם פרטי', key: 'firstName', width: 18 },
   { header: 'שם משפחה', key: 'lastName', width: 18 },
   { header: 'שם חברה', key: 'company', width: 22 },
@@ -36,7 +36,7 @@ export async function buildRegistrationsWorkbook(records) {
 
   records.forEach((r, i) => {
     sheet.addRow({
-      index: i + 1,
+      serial: r.serial ?? i + 1,
       firstName: r.firstName,
       lastName: r.lastName,
       company: r.company,

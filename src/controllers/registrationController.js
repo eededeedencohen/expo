@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { Registration } from '../models/Registration.js';
+import { nextSequence } from '../models/Counter.js';
 import { validateRegistration } from '../utils/validateRegistration.js';
 import { serializeRegistration } from '../utils/serialize.js';
 import { buildRegistrationsWorkbook } from '../services/excelService.js';
@@ -18,7 +19,8 @@ export async function createRegistration(req, res, next) {
     if (!valid) {
       return res.status(400).json({ error: 'validation', message: 'יש שדות לא תקינים', fields: errors });
     }
-    const doc = await Registration.create(data);
+    const serial = await nextSequence('registration');
+    const doc = await Registration.create({ ...data, serial });
     return res.status(201).json({ registration: serializeRegistration(doc) });
   } catch (err) {
     next(err);

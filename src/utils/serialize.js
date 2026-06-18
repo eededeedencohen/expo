@@ -5,6 +5,7 @@
 export function serializeRegistration(doc) {
   return {
     id: doc._id.toString(),
+    serial: doc.serial ?? null,
     firstName: doc.firstName,
     lastName: doc.lastName,
     company: doc.company,
