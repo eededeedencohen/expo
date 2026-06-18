@@ -11,6 +11,9 @@ import {
   setRaffle,
   getRaffle,
   removeFromRaffle,
+  getRaffleState,
+  setBroadcast,
+  postSpin,
 } from "../controllers/registrationController.js";
 import { requireAdmin } from "../middleware/requireAdmin.js";
 import { config } from "../config/env.js";
@@ -41,6 +44,9 @@ const lookupLimiter = rateLimit({
 
 // נתיבים ספציפיים לפני נתיבי פרמטר
 router.post("/lookup", lookupLimiter, lookupRegistration);
+router.get("/raffle/state", getRaffleState); // ציבורי — מצב חי לשידור
+router.post("/raffle/broadcast", requireAdmin, setBroadcast);
+router.post("/raffle/spin", requireAdmin, postSpin);
 router.get("/raffle", getRaffle); // ציבורי — תצוגה חיה
 router.post("/raffle", requireAdmin, setRaffle);
 router.post("/raffle/remove", requireAdmin, removeFromRaffle);

@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { Registration } from "../models/Registration.js";
 import { nextSequence, resetSequence } from "../models/Counter.js";
+import { RaffleState } from "../models/RaffleState.js";
 import { validateRegistration } from "../utils/validateRegistration.js";
 import { serializeRegistration } from "../utils/serialize.js";
 import { buildRegistrationsWorkbook } from "../services/excelService.js";
@@ -113,6 +114,76 @@ export async function getRaffle(req, res, next) {
       name: `${d.firstName || ""} ${d.lastName || ""}`.trim(),
     }));
     return res.json({ participants, count: participants.length });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * GET /api/registrations/raffle/state - מצב ההגרלה החי (ציבורי).
+ * מחזיר: משתתפים, האם משדרים, פקודת הסיבוב הנוכחית, מזהה סיבוב וזמן שרת (לסנכרון).
+ */
+export async function getRaffleState(req, res, next) {
+  try {
+    const stateDoc = await RaffleState.findById("current").lean();
+    const docs = await Registration.find({ inRaffle: true })
+      .select("serial firstName lastName")
+      .sort({ serial: 1, _id: 1 })
+      .lean();
+    const participants = docs.map((d) => ({
+      id: d._id.toString(),
+      serial: d.serial ?? null,
+      name: `${d.firstName || ""} ${d.lastName || ""}`.trim(),
+    }));
+    return res.json({
+      broadcasting: stateDoc?.broadcasting || false,
+      spinId: stateDoc?.spinId || 0,
+      spin: stateDoc?.spin || null,
+      participants,
+      serverTime: Date.now(),
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * POST /api/registrations/raffle/broadcast - הפעלה/כיבוי שידור (מנהל).
+ */
+export async function setBroadcast(req, res, next) {
+  try {
+    const on = Boolean(req.body?.on);
+    const update = { broadcasting: on };
+    if (!on) update.spin = null; // כיבוי משדר מנקה את הסיבוב הנוכחי
+    await RaffleState.findByIdAndUpdate("current", { $set: update }, { upsert: true });
+    return res.json({ broadcasting: on });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * POST /api/registrations/raffle/spin - שידור פקודת סיבוב (מנהל).
+ * השרת חותם startTime ומגדיל spinId כדי שכל הצופים יסונכרנו לאותה תנועה ולאותו זוכה.
+ */
+export async function postSpin(req, res, next) {
+  try {
+    const b = req.body || {};
+    const spin = {
+      startRotation: Number(b.startRotation) || 0,
+      targetRotation: Number(b.targetRotation) || 0,
+      duration: Math.min(20000, Math.max(1000, Number(b.duration) || 5500)),
+      startTime: Date.now(),
+      winnerId: typeof b.winnerId === "string" ? b.winnerId : null,
+      winnerName: typeof b.winnerName === "string" ? b.winnerName : "",
+      winnerSerial: b.winnerSerial == null ? null : Number(b.winnerSerial),
+    };
+    const updated = await RaffleState.findByIdAndUpdate(
+      "current",
+      { $inc: { spinId: 1 }, $set: { spin, broadcasting: true } },
+      { upsert: true, new: true }
+    ).lean();
+    return res.json({ spin, spinId: updated.spinId, serverTime: Date.now() });
   } catch (err) {
     next(err);
   }
