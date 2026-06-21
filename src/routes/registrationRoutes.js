@@ -15,6 +15,7 @@ import {
   setBroadcast,
   postSpin,
   setRaffleStatus,
+  insertDemoData,
 } from "../controllers/registrationController.js";
 import { requireAdmin } from "../middleware/requireAdmin.js";
 import { config } from "../config/env.js";
@@ -55,6 +56,7 @@ router.post("/raffle/remove", requireAdmin, removeFromRaffle);
 router.get("/export", requireAdmin, exportRegistrations);
 router.post("/delete-all", requireAdmin, deleteAllRegistrations);
 router.post("/bulk-delete", requireAdmin, bulkDeleteRegistrations);
+router.post("/demo", requireAdmin, insertDemoData);
 
 router.get("/", requireAdmin, getRegistrations);
 router.post("/", createLimiter, createRegistration);

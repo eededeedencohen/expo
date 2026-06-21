@@ -1,3 +1,6 @@
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import mongoose from "mongoose";
 import { Registration } from "../models/Registration.js";
 import { nextSequence, resetSequence } from "../models/Counter.js";
@@ -5,6 +8,13 @@ import { RaffleState } from "../models/RaffleState.js";
 import { validateRegistration } from "../utils/validateRegistration.js";
 import { serializeRegistration } from "../utils/serialize.js";
 import { buildRegistrationsWorkbook } from "../services/excelService.js";
+
+const DEMO_PATH = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "..",
+  "data",
+  "demoRegistrations.json",
+);
 
 // חלון ביטחון ל-cursor: רשומה עשויה להיכתב ל-DB מעט אחרי שנוצרה (createdAt).
 // דוגמים עם חפיפה קצרה אחורה כדי לא לפספס רשומות שנוצרו במקביל ונכתבו באיחור.
@@ -42,6 +52,26 @@ export async function createRegistration(req, res, next) {
     const serial = await nextSequence("registration");
     const doc = await Registration.create({ ...data, serial, phoneDigits });
     return res.status(201).json({ registration: serializeRegistration(doc) });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * POST /api/registrations/demo - הכנסת נתוני דמו (מנהל). שימושי כשאין נרשמים.
+ */
+export async function insertDemoData(req, res, next) {
+  try {
+    const demo = JSON.parse(fs.readFileSync(DEMO_PATH, "utf8"));
+    const docs = [];
+    for (const d of demo) {
+      const { valid, data } = validateRegistration(d);
+      if (!valid) continue;
+      const serial = await nextSequence("registration");
+      docs.push({ ...data, serial, phoneDigits: data.phone.replace(/\D/g, "") });
+    }
+    const inserted = await Registration.insertMany(docs);
+    return res.status(201).json({ inserted: inserted.length });
   } catch (err) {
     next(err);
   }
