@@ -211,6 +211,30 @@ export async function postSpin(req, res, next) {
 }
 
 /**
+ * POST /api/registrations/raffle/status - קביעת סטטוס "רשום להגרלה" לרשומה בודדת (מנהל).
+ */
+export async function setRaffleStatus(req, res, next) {
+  try {
+    const { id } = req.body || {};
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(400).json({ error: "bad_id", message: "מזהה לא תקין" });
+    }
+    const inRaffle = Boolean(req.body.inRaffle);
+    const updated = await Registration.findByIdAndUpdate(
+      id,
+      { $set: { inRaffle } },
+      { new: true }
+    ).lean();
+    if (!updated) {
+      return res.status(404).json({ error: "not_found", message: "הרשומה לא נמצאה" });
+    }
+    return res.json({ ok: true, id, inRaffle });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
  * POST /api/registrations/raffle/remove - הסרת משתתף בודד מההגרלה (מנהל).
  */
 export async function removeFromRaffle(req, res, next) {
