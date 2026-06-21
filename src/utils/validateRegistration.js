@@ -18,7 +18,7 @@ export function validateRegistration(body = {}) {
     role: clean(body.role, 80),
     phone: clean(body.phone, 25),
     email: clean(body.email, 120),
-    product: clean(body.product, 200),
+    product: clean(body.product, 600),
   };
 
   const errors = {};

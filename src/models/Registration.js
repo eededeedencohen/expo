@@ -44,8 +44,8 @@ const registrationSchema = new mongoose.Schema(
       maxlength: 120,
       match: [EMAIL_RE, "כתובת מייל לא תקינה"],
     },
-    // אופציונלי - מוצר שנרכש
-    product: { type: String, trim: true, default: "", maxlength: 200 },
+    // אופציונלי - מוצר/ים שנבחרו (יכול לכלול כמה, מופרדים בפסיק, + טקסט חופשי)
+    product: { type: String, trim: true, default: "", maxlength: 600 },
     // מספר הרשמה רץ וייחודי (אינדקס הרשמה / מספר להגרלה)
     serial: { type: Number, index: true },
     // האם הנרשם משתתף כרגע בהגרלה (לתצוגה חיה ומשותפת בין מכשירים)
