@@ -13,6 +13,7 @@ export function serializeRegistration(doc) {
     phone: doc.phone,
     email: doc.email,
     product: doc.product || '',
+    note: doc.note || '',
     inRaffle: Boolean(doc.inRaffle),
     createdAt: doc.createdAt instanceof Date ? doc.createdAt.toISOString() : doc.createdAt,
   };

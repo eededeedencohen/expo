@@ -9,6 +9,7 @@ const COLUMNS = [
   { header: 'טלפון', key: 'phone', width: 16 },
   { header: 'מייל', key: 'email', width: 28 },
   { header: 'מוצר', key: 'product', width: 22 },
+  { header: 'הערות', key: 'note', width: 30 },
   { header: 'תאריך הרשמה', key: 'createdAt', width: 20 },
 ];
 
@@ -44,6 +45,7 @@ export async function buildRegistrationsWorkbook(records) {
       phone: r.phone,
       email: r.email,
       product: r.product || '',
+      note: r.note || '',
       createdAt: r.createdAt ? new Date(r.createdAt) : null,
     });
   });

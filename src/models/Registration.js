@@ -46,6 +46,8 @@ const registrationSchema = new mongoose.Schema(
     },
     // אופציונלי - מוצר/ים שנבחרו (יכול לכלול כמה, מופרדים בפסיק, + טקסט חופשי)
     product: { type: String, trim: true, default: "", maxlength: 600 },
+    // הערת מנהל חופשית לכל נרשם (צפייה/עריכה בלוח, מודפסת ב-PDF)
+    note: { type: String, trim: true, default: "", maxlength: 2000 },
     // מספר הרשמה רץ וייחודי (אינדקס הרשמה / מספר להגרלה)
     serial: { type: Number, index: true },
     // האם הנרשם משתתף כרגע בהגרלה (לתצוגה חיה ומשותפת בין מכשירים)
