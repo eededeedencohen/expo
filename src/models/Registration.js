@@ -48,10 +48,19 @@ const registrationSchema = new mongoose.Schema(
     product: { type: String, trim: true, default: "", maxlength: 600 },
     // הערת מנהל חופשית לכל נרשם (צפייה/עריכה בלוח, מודפסת ב-PDF)
     note: { type: String, trim: true, default: "", maxlength: 2000 },
+    // צבע רקע הפתק — ריק = ברירת המחדל (סגול)
+    noteColor: {
+      type: String,
+      trim: true,
+      default: "",
+      enum: ["", "purple", "yellow", "green", "pink", "blue"],
+    },
     // מספר הרשמה רץ וייחודי (אינדקס הרשמה / מספר להגרלה)
     serial: { type: Number, index: true },
     // האם הנרשם משתתף כרגע בהגרלה (לתצוגה חיה ומשותפת בין מכשירים)
     inRaffle: { type: Boolean, default: false, index: true },
+    // סימון מועדף (כוכב) על ידי המנהל — מאפשר סינון "רק מועדפים" בלוח
+    favorite: { type: Boolean, default: false },
     // ספרות הטלפון בלבד — לבדיקת ייחודיות (ללא תלות בפורמט)
     phoneDigits: { type: String, index: true },
   },

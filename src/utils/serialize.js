@@ -14,7 +14,9 @@ export function serializeRegistration(doc) {
     email: doc.email,
     product: doc.product || '',
     note: doc.note || '',
+    noteColor: doc.noteColor || '',
     inRaffle: Boolean(doc.inRaffle),
+    favorite: Boolean(doc.favorite),
     createdAt: doc.createdAt instanceof Date ? doc.createdAt.toISOString() : doc.createdAt,
   };
 }

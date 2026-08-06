@@ -16,6 +16,7 @@ import {
   postSpin,
   setRaffleStatus,
   setNote,
+  setFavorite,
   insertDemoData,
 } from "../controllers/registrationController.js";
 import { requireAdmin } from "../middleware/requireAdmin.js";
@@ -52,6 +53,7 @@ router.post("/raffle/broadcast", requireAdmin, setBroadcast);
 router.post("/raffle/spin", requireAdmin, postSpin);
 router.post("/raffle/status", requireAdmin, setRaffleStatus);
 router.post("/note", requireAdmin, setNote);
+router.post("/favorite", requireAdmin, setFavorite);
 router.get("/raffle", getRaffle); // ציבורי — תצוגה חיה
 router.post("/raffle", requireAdmin, setRaffle);
 router.post("/raffle/remove", requireAdmin, removeFromRaffle);

@@ -265,6 +265,30 @@ export async function setRaffleStatus(req, res, next) {
 }
 
 /**
+ * POST /api/registrations/favorite - סימון/ביטול מועדף לרשומה בודדת (מנהל).
+ */
+export async function setFavorite(req, res, next) {
+  try {
+    const { id } = req.body || {};
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(400).json({ error: "bad_id", message: "מזהה לא תקין" });
+    }
+    const favorite = Boolean(req.body.favorite);
+    const updated = await Registration.findByIdAndUpdate(
+      id,
+      { $set: { favorite } },
+      { new: true }
+    ).lean();
+    if (!updated) {
+      return res.status(404).json({ error: "not_found", message: "הרשומה לא נמצאה" });
+    }
+    return res.json({ ok: true, id, favorite });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
  * POST /api/registrations/note - עדכון הערת מנהל לרשומה בודדת (מנהל).
  */
 export async function setNote(req, res, next) {
@@ -276,15 +300,25 @@ export async function setNote(req, res, next) {
     const note = (typeof req.body.note === "string" ? req.body.note : "")
       .trim()
       .slice(0, 2000);
+    // צבע הפתק — רק ערכים מהפלטה המוכרת (ריק = ברירת המחדל)
+    const allowedColors = new Set(["", "purple", "yellow", "green", "pink", "blue"]);
+    const rawColor =
+      typeof req.body.noteColor === "string" ? req.body.noteColor.trim() : "";
+    const noteColor = allowedColors.has(rawColor) ? rawColor : "";
     const updated = await Registration.findByIdAndUpdate(
       id,
-      { $set: { note } },
+      { $set: { note, noteColor } },
       { new: true }
     ).lean();
     if (!updated) {
       return res.status(404).json({ error: "not_found", message: "הרשומה לא נמצאה" });
     }
-    return res.json({ ok: true, id, note: updated.note || "" });
+    return res.json({
+      ok: true,
+      id,
+      note: updated.note || "",
+      noteColor: updated.noteColor || "",
+    });
   } catch (err) {
     next(err);
   }
